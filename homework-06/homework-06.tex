@@ -1,0 +1,380 @@
+\documentclass[a4paper, 10pt]{article}
+\usepackage{scrextend}
+\changefontsizes{9pt}
+\input{../course-config}
+\usepackage{../vendor/template/CEDT-Assignment-style}
+
+\begin{document}
+\subject
+\asgntitle{6}{}{Week 6}{\StudentID\ \StudentName}{\DefaultCollaborators}
+
+% ================================================================================ %
+%                                    Problem 01                                    %
+% ================================================================================ %
+\begin{problem}
+Design a Self-Checking 2:4 Demultiplexer with Enable.
+
+\begin{figure}[h]
+	\centering
+
+	\begin{minipage}[c]{0.54\textwidth}
+		\centering
+		\resizebox{\linewidth}{!}{%
+			\begin{tikzpicture}[
+					circuit logic US,
+					wire/.style={
+							draw,
+							line width=0.8pt,
+							line cap=round,
+							line join=round
+						},
+					junction/.style={
+							circle,
+							fill=black,
+							inner sep=1.5pt
+						},
+					gate/.style={
+							draw,
+							line width=0.8pt,
+							minimum width=1.25cm,
+							minimum height=0.95cm,
+							logic gate inputs=nnn
+						}
+				]
+
+				% =========================================================
+				% AND gates
+				% =========================================================
+				\node[and gate US, gate] (g0) at (7.6,6.0) {};
+				\node[and gate US, gate] (g1) at (7.6,4.0) {};
+				\node[and gate US, gate] (g2) at (7.6,2.0) {};
+				\node[and gate US, gate] (g3) at (7.6,0.0) {};
+
+				% =========================================================
+				% Reference levels
+				% =========================================================
+				\coordinate (Alevel)  at (0,0 |- g0.input 1);
+				\coordinate (Blevel)  at (0,3.0);
+				\coordinate (ENlevel) at (0,0 |- g3.input 3);
+
+				% =========================================================
+				% Input labels
+				% =========================================================
+				\node[anchor=east] (Alabel)  at (-0.15,0 |- Alevel)  {$A$};
+				\node[anchor=east] (Blabel)  at (-0.15,0 |- Blevel)  {$B$};
+				\node[anchor=east] (ENlabel) at (-0.15,0 |- ENlevel) {$EN$};
+
+				% =========================================================
+				% NOT gates
+				% =========================================================
+				\node[
+					not gate US,
+					draw,
+					line width=0.8pt,
+					minimum width=0.75cm,
+					minimum height=0.55cm
+				] (notA) at (1.55,0 |- Alevel) {};
+
+				\node[
+					not gate US,
+					draw,
+					line width=0.8pt,
+					minimum width=0.75cm,
+					minimum height=0.55cm
+				] (notB) at (1.55,0 |- Blevel) {};
+
+				% =========================================================
+				% A input
+				% =========================================================
+				\coordinate (Asplit) at (0.75,0 |- Alevel);
+
+				\draw[wire]
+				(Alabel.east)
+				-- (notA.input);
+
+				\node[junction] at (Asplit) {};
+
+				% =========================================================
+				% A' distribution
+				% =========================================================
+				\coordinate (AbarTop)    at (3.05,0 |- g0.input 1);
+				\coordinate (AbarBottom) at (3.05,0 |- g2.input 1);
+
+				\draw[wire]
+				(notA.output)
+				-- (g0.input 1);
+
+				\draw[wire]
+				(AbarTop)
+				-- (AbarBottom)
+				-- (g2.input 1);
+
+				\node[junction] at (AbarTop) {};
+
+				% =========================================================
+				% A distribution
+				% =========================================================
+				\coordinate (AbusTop)    at (3.65,0 |- g1.input 1);
+				\coordinate (AbusBottom) at (3.65,0 |- g3.input 1);
+
+				\draw[wire]
+				(Asplit)
+				-- (Asplit |- g1.input 1)
+				-- (AbusTop)
+				-- (g1.input 1);
+
+				\draw[wire]
+				(AbusTop)
+				-- (AbusBottom)
+				-- (g3.input 1);
+
+				\node[junction] at (AbusTop) {};
+
+				% =========================================================
+				% B input
+				% =========================================================
+				\coordinate (Bsplit) at (0.75,0 |- Blevel);
+
+				\draw[wire]
+				(Blabel.east)
+				-- (notB.input);
+
+				\node[junction] at (Bsplit) {};
+
+				% =========================================================
+				% B' distribution
+				% =========================================================
+				\coordinate (BbarBase)   at (4.35,0 |- Blevel);
+				\coordinate (BbarTop)    at (4.35,0 |- g0.input 2);
+				\coordinate (BbarMiddle) at (4.35,0 |- g1.input 2);
+
+				\draw[wire]
+				(notB.output)
+				-- (BbarBase);
+
+				\draw[wire]
+				(BbarBase)
+				-- (BbarTop)
+				-- (g0.input 2);
+
+				\draw[wire]
+				(BbarMiddle)
+				-- (g1.input 2);
+
+				\node[junction] at (BbarMiddle) {};
+
+				% =========================================================
+				% B distribution
+				% =========================================================
+				\coordinate (BbusTop)    at (4.95,0 |- g2.input 2);
+				\coordinate (BbusBottom) at (4.95,0 |- g3.input 2);
+
+				\draw[wire]
+				(Bsplit)
+				-- (Bsplit |- g2.input 2)
+				-- (BbusTop)
+				-- (g2.input 2);
+
+				\draw[wire]
+				(BbusTop)
+				-- (BbusBottom)
+				-- (g3.input 2);
+
+				\node[junction] at (BbusTop) {};
+
+				% =========================================================
+				% Enable distribution
+				% =========================================================
+				\coordinate (ENbusBottom) at (5.75,0 |- g3.input 3);
+				\coordinate (ENbus2)      at (5.75,0 |- g2.input 3);
+				\coordinate (ENbus1)      at (5.75,0 |- g1.input 3);
+				\coordinate (ENbusTop)    at (5.75,0 |- g0.input 3);
+
+				\draw[wire]
+				(ENlabel.east)
+				-- (ENbusBottom)
+				-- (g3.input 3);
+
+				\draw[wire]
+				(ENbusBottom)
+				-- (ENbusTop)
+				-- (g0.input 3);
+
+				\draw[wire]
+				(ENbus1)
+				-- (g1.input 3);
+
+				\draw[wire]
+				(ENbus2)
+				-- (g2.input 3);
+
+				\node[junction] at (ENbusBottom) {};
+				\node[junction] at (ENbus1) {};
+				\node[junction] at (ENbus2) {};
+
+				% =========================================================
+				% Outputs
+				% =========================================================
+				\draw[wire]
+				(g0.output)
+				-- ++(1.35,0)
+				node[right] {$A'B'$};
+
+				\draw[wire]
+				(g1.output)
+				-- ++(1.35,0)
+				node[right] {$AB'$};
+
+				\draw[wire]
+				(g2.output)
+				-- ++(1.35,0)
+				node[right] {$A'B$};
+
+				\draw[wire]
+				(g3.output)
+				-- ++(1.35,0)
+				node[right] {$AB$};
+
+			\end{tikzpicture}%
+		}
+	\end{minipage}
+	\hfill
+	\begin{minipage}[c]{0.38\textwidth}
+		\centering
+		\renewcommand{\arraystretch}{1.15}
+		\setlength{\tabcolsep}{5pt}
+		\resizebox{\linewidth}{!}{%
+			\begin{tabular}{|c|c|c|c|c|c|c|}
+				\hline
+				$E$ & $A$ & $B$ & $D_0$ & $D_1$ & $D_2$ & $D_3$ \\
+				\hline
+				0   & X   & X   & 0     & 0     & 0     & 0     \\
+				\hline
+				1   & 0   & 0   & 1     & 0     & 0     & 0     \\
+				\hline
+				1   & 0   & 1   & 0     & 1     & 0     & 0     \\
+				\hline
+				1   & 1   & 0   & 0     & 0     & 1     & 0     \\
+				\hline
+				1   & 1   & 1   & 0     & 0     & 0     & 1     \\
+				\hline
+			\end{tabular}%
+		}
+	\end{minipage}
+
+\end{figure}
+\end{problem}
+
+\begin{solution}
+	Number the outputs as in the truth table: $D_0 = E A'B'$, $D_1 = E A'B$,
+	$D_2 = E AB'$, $D_3 = E AB$, i.e.\ the four AND gates of the figure, each
+	gated by $EN$. Fault free, $(D_0,D_1,D_2,D_3)$ carries exactly one $1$
+	when $E=1$ and is all-zero when $E=0$. The first half of that is a
+	$1$-out-of-$4$ code, which is easy to check, but the idle word $0000$ is
+	not in it, so a checker watching the four outputs alone would report a
+	fault every time the demux is disabled.
+
+	\myspace
+	\textbf{Step 1: make the output code constant weight.} Add a fifth
+	``idle'' line $D_4 = E'$ (one inverter on $EN$). Then
+	$(D_0,D_1,D_2,D_3,D_4)$ is a $1$-out-of-$5$ codeword for \emph{every}
+	input combination, with $D_4=1$ marking the disabled state. Any fault
+	that kills the active output, turns on a second one, or lets an output
+	through while $E=0$ now pushes the word off the code (weight $0$ or $2$).
+
+	\myspace
+	\textbf{Step 2: reduce $1$-out-of-$5$ to two-rail signals.} A pair of OR
+	gates over a subset of the lines and its complement produces a two-rail
+	(complementary) pair for every codeword. Such a pair misses a
+	double-active word only when both active lines sit on the same side of
+	the split, so with $k$ pairs each line carries a $k$-bit membership
+	signature and two lines are distinguished only if their signatures
+	differ: $2^k \ge 5$, hence $k = 3$ pairs is the minimum. Splitting on
+	``idle'', on $A$ and on $B$ gives three pairs, five OR gates in total:
+	\[
+		P = \paren{D_0{+}D_1{+}D_2{+}D_3,\ D_4}, \qquad
+		Q = \paren{D_0{+}D_1{+}D_4,\ D_2{+}D_3}, \qquad
+		R = \paren{D_0{+}D_2{+}D_4,\ D_1{+}D_3}.
+	\]
+
+	\myspace
+	\textbf{Step 3: merge the pairs with two-rail checker cells.} A TRC cell
+	takes two two-rail pairs $(a_0,a_1)$, $(b_0,b_1)$ and outputs
+	\[
+		c_0 = a_0b_0 + a_1b_1, \qquad c_1 = a_0b_1 + a_1b_0,
+	\]
+	which is complementary iff both inputs are. Cascading two cells,
+	$S = \mathrm{TRC}(P,Q)$ and $Z = \mathrm{TRC}(S,R)$, gives one final
+	pair: $Z_0 \neq Z_1$ means healthy, $Z_0 = Z_1$ ($00$ or $11$) means
+	fault.
+
+	\begin{figure}[H]
+		\centering
+		\resizebox{0.95\linewidth}{!}{%
+			\begin{tikzpicture}[
+					>=Stealth, thick,
+					grp/.style={draw, rectangle, minimum width=5.0cm, minimum height=1.0cm, font=\small},
+					trc/.style={draw, rectangle, minimum width=1.6cm, minimum height=1.7cm, font=\small},
+					lbl/.style={font=\small},
+				]
+				\node[lbl] (bus) at (0,0) {$\begin{array}{c} D_0,\,D_1,\,D_2,\,D_3 \\[2pt] D_4 = E' \end{array}$};
+
+				\node[grp] (P) at (5.4,2.5)  {$P = (\,D_0{+}D_1{+}D_2{+}D_3,\ D_4\,)$};
+				\node[grp] (Q) at (5.4,0.0)  {$Q = (\,D_0{+}D_1{+}D_4,\ D_2{+}D_3\,)$};
+				\node[grp] (R) at (5.4,-2.5) {$R = (\,D_0{+}D_2{+}D_4,\ D_1{+}D_3\,)$};
+
+				\draw[->] (bus) -- (P);
+				\draw[->] (bus) -- (Q);
+				\draw[->] (bus) -- (R);
+
+				\node[trc] (T1) at (10.4,1.25)  {TRC$_1$};
+				\node[trc] (T2) at (13.6,-0.65) {TRC$_2$};
+
+				\draw[->] (P.east) -- ++(0.9,0) |- ($(T1.west)+(0,0.55)$);
+				\draw[->] (Q.east) -- ++(0.9,0) |- ($(T1.west)+(0,-0.55)$);
+				\draw[->] (T1.east) -- ++(0.8,0) node[lbl, above, midway]{$S$} |- ($(T2.west)+(0,0.55)$);
+				\draw[->] (R.east) -- ++(4.1,0) |- ($(T2.west)+(0,-0.55)$);
+				\draw[->] (T2.east) -- ++(1.6,0) node[lbl, right]{$(Z_0,Z_1)$};
+			\end{tikzpicture}%
+		}
+		\caption{Checker for the demultiplexer: the $1$-out-of-$5$ output word
+			is compressed into three two-rail pairs and merged by two two-rail
+			checker cells. $Z_0 \neq Z_1$ is fault free, $Z_0 = Z_1$ signals a
+			fault.}
+		\label{fig:selfcheck-demux}
+	\end{figure}
+
+	\myspace
+	\textbf{Fault-free behaviour.} All five normal words map to a
+	complementary $Z$, and both values of $Z$ occur:
+
+	\begin{simpletable}{cccccccc}{Checker response over the five normal input states (pairs written $x_0x_1$).}{selfcheck-demux}
+		$E$ & $A$ & $B$ & Active line & $P$ & $Q$ & $R$ & $Z$ \\
+		\midrule
+		0 & X & X & $D_4$ & 01 & 10 & 10 & 01 \\
+		1 & 0 & 0 & $D_0$ & 10 & 10 & 10 & 10 \\
+		1 & 0 & 1 & $D_1$ & 10 & 10 & 01 & 01 \\
+		1 & 1 & 0 & $D_2$ & 10 & 01 & 10 & 01 \\
+		1 & 1 & 1 & $D_3$ & 10 & 01 & 01 & 10 \\
+	\end{simpletable}
+
+	\myspace
+	\textbf{Coverage.} Every single stuck-at fault inside the demux -- on an
+	inverter, on an AND gate input or output, or on an output line -- either
+	drops the active output, raises an extra one, or lets one through while
+	$E=0$. In all three cases the word has weight $0$ or $2$, at least one of
+	$P,Q,R$ becomes non-complementary, and the TRC cells propagate that to
+	$Z_0 = Z_1$. For instance $D_3$ stuck-at-$1$ while $D_0$ is active gives
+	$R = (1,1)$, and the $A$ branch stuck-at-$0$ with $E=1$ silences every
+	output and gives $P = (0,0)$. The checker is itself self-testing: the
+	five words above drive both rails of every OR group and both values of
+	$Z$, so a single stuck-at fault inside the checker also shows up as a
+	non-code $Z$ for at least one normal input -- the pair is totally
+	self-checking. The one thing the output code cannot see is a fault on $A$
+	or $B$ \emph{upstream} of the demux: the wrong output then fires alone,
+	which is still a legal codeword, so catching that requires the select
+	inputs to arrive in two-rail form and be checked separately.
+\end{solution}
+% ================================================================================ %
+
+\end{document}
