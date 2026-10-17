@@ -1,0 +1,147 @@
+\documentclass[a4paper, 10pt]{article}
+\usepackage{scrextend}
+\changefontsizes{9pt}
+\input{../course-config}
+\usepackage{../vendor/template/CEDT-Assignment-style}
+
+\begin{document}
+\subject
+\asgntitle{7}{}{Week 7}{\StudentID\ \StudentName}{\DefaultCollaborators}
+
+% ================================================================================ %
+%                                    Problem 01                                    %
+% ================================================================================ %
+\begin{problem}
+A system which is operated from \( X \) to \( Y \) via the redundant non serial-parallel path as shown in the figure below.
+Let each module (\( A \), \( B \), and \( K \)) has their reliabilities (\( R_a \), \( R_b \), and \( R_k \)) respectively
+and ignore the reliabilities of the connections.
+
+\par Find the system reliability.
+
+\myspace
+
+\begin{center}
+	\begin{tikzpicture}[
+		line width=0.9pt,
+		signal/.style={
+				draw=blue!55!cyan,
+				line width=1pt
+			},
+		arrow/.style={
+		signal,
+		-{Latex[length=2.2mm,width=1.7mm]}
+		},
+		block/.style={
+				draw=blue!25!black,
+				line width=0.9pt,
+				fill=white,
+				minimum width=1.4cm,
+				minimum height=0.95cm,
+				font=\Large,
+				inner sep=0pt
+			},
+		junction/.style={
+				circle,
+				fill=blue!25!black,
+				inner sep=1.3pt
+			}
+		]
+
+		% Blocks A
+		\node[block] (A1) at (1.65,3.6) {A};
+		\node[block] (A2) at (1.65,1.8) {A};
+		\node[block] (A3) at (1.65,0.0) {A};
+
+		% Blocks B
+		\node[block] (B1) at (6.55,3.6) {B};
+		\node[block] (B2) at (6.55,1.8) {B};
+		\node[block] (B3) at (6.55,0.0) {B};
+
+		% Blocks K
+		\node[block] (K1) at (4.10,2.7) {K};
+		\node[block] (K2) at (4.10,0.9) {K};
+
+		% Input X
+		\node[left] at (-1.0,1.8) {\Large X};
+		\draw[signal] (-1.0,1.8) -- (0,1.8);
+
+		% Input branching
+		\draw[signal] (0,3.6) -- (0,0);
+		\draw[arrow] (0,3.6) -- (A1.west);
+		\draw[arrow] (0,1.8) -- (A2.west);
+		\draw[arrow] (0,0) -- (A3.west);
+
+		% A to B connections
+		\draw[arrow] (A1.east) -- (B1.west);
+		\draw[arrow] (A2.east) -- (B2.west);
+		\draw[arrow] (A3.east) -- (B3.west);
+
+		% K1: top and middle connections
+		\draw[arrow] (4.10,3.6) -- (K1.north);
+		\draw[arrow] (4.10,1.8) -- (K1.south);
+
+		% K2: middle and bottom connections
+		\draw[arrow] (4.10,1.8) -- (K2.north);
+		\draw[arrow] (4.10,0) -- (K2.south);
+
+		% Output merging
+		\draw[signal] (B1.east) -- (8.2,3.6);
+		\draw[signal] (B2.east) -- (8.2,1.8);
+		\draw[signal] (B3.east) -- (8.2,0);
+		\draw[signal] (8.2,3.6) -- (8.2,0);
+
+		% Output Y
+		\draw[arrow] (8.2,1.8) -- (9.25,1.8);
+		\node[right] at (9.25,1.8) {\Large Y};
+
+		% Junction dots
+		\node[junction] at (0,1.8) {};
+		\node[junction] at (4.10,3.6) {};
+		\node[junction] at (4.10,1.8) {};
+		\node[junction] at (4.10,0) {};
+		\node[junction] at (8.2,1.8) {};
+
+	\end{tikzpicture}
+\end{center}
+\end{problem}
+
+\begin{solution}
+	Let $m_1,m_2,m_3$ be the midpoints of the three $A \to B$ paths (top to
+	bottom). $K_1$ bridges $m_1$--$m_2$ and $K_2$ bridges $m_2$--$m_3$, so
+	the network is not series-parallel. Use the decomposition (conditional
+	probability) method on the $K$ modules: $X$ reaches $Y$ iff some working
+	$A_i$ and some working $B_j$ have $m_i$, $m_j$ joined by working $K$'s.
+	Define
+	\[
+		P = R_aR_b, \quad
+		Q_2 = \sqbracket{1-(1-R_a)^2}\sqbracket{1-(1-R_b)^2}, \quad
+		Q_3 = \sqbracket{1-(1-R_a)^3}\sqbracket{1-(1-R_b)^3}.
+	\]
+
+	\begin{itemize}
+		\item \textbf{$K_1$, $K_2$ both good} ($R_k^2$): $m_1,m_2,m_3$ merge into
+		      one node, giving 3 parallel $A$'s in series with 3 parallel
+		      $B$'s: $R = Q_3$.
+		\item \textbf{Exactly one $K$ good} ($2R_k(1-R_k)$, symmetric): two
+		      paths merge into a ``2 $A$ $\parallel$ -- 2 $B$ $\parallel$''
+		      block, in parallel with the remaining single $A$--$B$ path:
+		      $R = 1-(1-Q_2)(1-P)$.
+		\item \textbf{Both $K$ failed} ($(1-R_k)^2$): three independent
+		      $A$--$B$ paths in parallel: $R = 1-(1-P)^3$.
+	\end{itemize}
+
+	By the total probability theorem,
+	\[
+		\boxed{
+			R_{sys} = R_k^2\,Q_3
+			+ 2R_k(1-R_k)\sqbracket{1-(1-Q_2)(1-R_aR_b)}
+			+ (1-R_k)^2\sqbracket{1-(1-R_aR_b)^3}
+		}
+	\]
+	\textit{Check:} $R_k=1$ gives $Q_3$ (fully cross-connected) and $R_k=0$
+	gives three plain parallel paths, as expected.
+\end{solution}
+% ================================================================================ %
+
+
+\end{document}
